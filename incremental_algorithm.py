@@ -62,13 +62,13 @@ class IncrementalAssignmentAlgorithm(object):
             # Previous Assignment
             open_a_delta -= self.values[prev_open_a[0]][prev_open_a[1]]
 
-            if cur_a_delta + open_a_delta > greates_value_increase:
+            if cur_a_delta + open_a_delta < greates_value_increase:
                 greates_value_increase = cur_a_delta + open_a_delta
 
-                if cur_a_delta > open_a_delta:
+                if cur_a_delta < open_a_delta:
                     swap = (new_cur_a, prev_cur_a, new_open_a)  # add, remove, new_open
 
-                elif open_a_delta > cur_a_delta:
+                elif open_a_delta < cur_a_delta:
                     swap = (new_open_a, prev_cur_a, new_cur_a)  # add, remove, new_open
 
                 else:

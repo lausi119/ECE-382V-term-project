@@ -76,7 +76,7 @@ def validate_result(values, assignments):
         incremental_total += values[a[0]][a[1]]
 
     print('Validating:')
-    print(f'Munkres: {assignments}')
-    print(f'Incremental: {solution}')
+    print(f'Munkres:     {munkres_total}, {solution}')
+    print(f'Incremental: {incremental_total}, {assignments}')
 
     return incremental_total == munkres_total, incremental_total, munkres_total

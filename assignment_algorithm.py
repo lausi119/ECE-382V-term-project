@@ -1,7 +1,8 @@
 # Advanced Algorithms - Term Project
 # Implementing an algorithm for the Incremental Assignment Problem
+
 from incremental_algorithm import IncrementalAssignmentAlgorithm
-from util import pad_matrix, generate_random_test, load_tests_from_file, write_to_csv, validate_result
+from util import generate_random_test, load_tests_from_file, write_to_csv, validate_result
 import argparse
 
 
