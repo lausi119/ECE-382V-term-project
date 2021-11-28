@@ -16,7 +16,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.test == 'file':
-        examples = load_tests_from_file()
+        examples = [load_tests_from_file()[0]]
 
     elif args.test == 'random':
         if args.settings is not None:

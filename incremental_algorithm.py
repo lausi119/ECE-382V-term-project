@@ -9,6 +9,8 @@ class IncrementalAssignmentAlgorithm(object):
         self.input_solution = solution
         self.steps = 0
 
+        self._cache = {}
+
     def run(self):
         row_idxs = []
         col_idxs = []
@@ -24,11 +26,11 @@ class IncrementalAssignmentAlgorithm(object):
 
         open_assignment = (row_idxs[0], col_idxs[0])
 
-        new_assignments = self.recursive_reassign(self.input_solution, open_assignment)
+        new_assignments, delta = self.recursive_reassign(self.input_solution, open_assignment)
 
         print(' ')
-        print(' ')
-        print(f'Algorithm Returned in {self.steps} steps')
+        print(f'Solution: {self.input_solution}')
+        print(f'Algorithm Returned in {self.steps} steps with a {delta} delta')
         print(f'Final Assignment:')
         print(' ')
         self.print_assignment(new_assignments, None)
@@ -36,10 +38,34 @@ class IncrementalAssignmentAlgorithm(object):
         return new_assignments, self.size, self.steps
 
     def recursive_reassign(self, assignments, open_assignment):
-        self.print_assignment(assignments, open_assignment)
+        hash_key = str(hash(str(assignments))) + str(open_assignment)
+
+        if hash_key in self._cache:
+            return self._cache[hash_key]
+        # self.print_assignment(assignments, open_assignment)
 
         greates_value_increase = 0
         swap = None
+
+        max_delta = 0
+        max_assignments = None
+        #
+        # 4,4 -> 4,6 + 6,6 -> 6,4
+        #
+        # 0,2 -> 0,4 + 6,4 -> 6,2
+        #
+        # 1,1 -> 1,2 + 6,2 -> 6,1
+        if open_assignment == (6, 4):
+            pass
+
+        if open_assignment == (6, 2):
+            pass
+
+        if open_assignment == (6, 1):
+            pass
+
+        if open_assignment == (6, 4):
+            pass
 
         for cur_assignment in assignments:
             self.steps += 1
@@ -62,32 +88,57 @@ class IncrementalAssignmentAlgorithm(object):
             # Previous Assignment
             open_a_delta -= self.values[prev_open_a[0]][prev_open_a[1]]
 
-            if cur_a_delta + open_a_delta < greates_value_increase:
-                greates_value_increase = cur_a_delta + open_a_delta
+            # if cur_a_delta <= open_a_delta:
+            # if cur_a_delta < 0 or open_a_delta < 0:
+                # greates_value_increase = cur_a_delta + open_a_delta
+            a = assignments.copy()
+            a.remove(prev_cur_a)
 
-                if cur_a_delta < open_a_delta:
-                    swap = (new_cur_a, prev_cur_a, new_open_a)  # add, remove, new_open
+            optimal_assignment, delta = self.recursive_reassign(a, new_open_a)
+            if max_delta > cur_a_delta + open_a_delta + delta:
+                max_delta = cur_a_delta + open_a_delta + delta
+                max_assignments = optimal_assignment + [new_cur_a]
 
-                elif open_a_delta < cur_a_delta:
-                    swap = (new_open_a, prev_cur_a, new_cur_a)  # add, remove, new_open
+            # # if cur_a_delta >= open_a_delta:
+            # a = assignments.copy()
+            # a.remove(prev_cur_a)
+            #
+            # optimal_assignment, delta = self.recursive_reassign(a, new_cur_a)
+            # if max_delta > cur_a_delta + open_a_delta + delta:
+            #     max_delta = cur_a_delta + open_a_delta + delta
+            #     max_assignments = optimal_assignment + [new_open_a]
 
-                else:
-                    swap = (new_open_a, prev_cur_a, new_cur_a)  # add, remove, new_open
+        if max_assignments:
+            ss = True
+            for a in max_assignments:
+                if a not in [(0, 4), (1, 2), (2, 5), (3, 3), (4, 6), (5, 0), (6, 1)]:
+                    ss = False
 
-        if swap is not None:
-            # We shouldn't have to recalculate the value delta for reversing the swap that we just did.
-            # So, would it be fair to just remove the new assignment as long as the cur and open delta are not equal?
-            assignments.append(swap[0])
-            assignments.remove(swap[1])
+            if ss:
+                print('TRUUEE')
+            else:
+                print('FAALSE')
 
-            return self.recursive_reassign(assignments, swap[2])
+            self.print_assignment(max_assignments, [])
+            self._cache[hash_key] = max_assignments, max_delta
+            return max_assignments, max_delta
         else:
-            return assignments + [open_assignment]
+            self._cache[hash_key] = assignments + [open_assignment], 0
+            return assignments + [open_assignment], 0
+        # if swap is not None:
+        #     # We shouldn't have to recalculate the value delta for reversing the swap that we just did.
+        #     # So, would it be fair to just remove the new assignment as long as the cur and open delta are not equal?
+        #     assignments.append(swap[0])
+        #     assignments.remove(swap[1])
+        #
+        #     return self.recursive_reassign(assignments, swap[2])
+        # else:
+        #     return assignments + [open_assignment]
 
     def print_assignment(self, assignments, open_a):
 
         print(f'------------------------------------------------')
-        print(f'Assignments: {assignments}')
+        print(f'Assignments: {assignments}, {open_a}')
         print(f'------------------------------------------------')
 
         for row in range(0, self.size):
