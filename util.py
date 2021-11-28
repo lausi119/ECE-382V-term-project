@@ -47,7 +47,7 @@ def generate_random_test(min_size=4, max_size=4, val_range=9, num_tests=1):
     examples = []
     m = Munkres()
     for idx in range(0, num_tests):
-        size = random.randint(min_size, max_size)
+        size = idx + 1 #random.randint(min_size, max_size)
 
         matrix = [[random.randint(0, val_range) for _ in range(0, size)] for _ in range(0, size)]
         solution = m.compute(matrix)

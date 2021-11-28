@@ -46,7 +46,7 @@ if __name__ == '__main__':
         print("")
 
         example = examples[idx]
-        output_assignments, size, steps = IncrementalAssignmentAlgorithm(
+        output_assignments, size, steps, cache_hits = IncrementalAssignmentAlgorithm(
             example['values'],
             # Couldn't load tuples from the JSON file but I am too lazy to use arrays instead,
             # so im just casting all the solution arrays from the json to tuples here
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
         valid, incremental_total, munkres_total = validate_result(example['values'], output_assignments)
 
-        history.append((str(size), str(steps), str(valid), str(incremental_total), str(munkres_total)))
+        history.append((str(size), str(steps), str(cache_hits), str(valid), str(incremental_total), str(munkres_total)))
 
     write_to_csv(history)
 

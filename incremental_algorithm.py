@@ -1,4 +1,4 @@
-from util import pad_matrix
+from util import pad_matrix, sort
 
 
 class IncrementalAssignmentAlgorithm(object):
@@ -8,6 +8,7 @@ class IncrementalAssignmentAlgorithm(object):
         self.values = values
         self.input_solution = solution
         self.steps = 0
+        self.cache_hits = 0
 
         self._cache = {}
 
@@ -30,42 +31,22 @@ class IncrementalAssignmentAlgorithm(object):
 
         print(' ')
         print(f'Solution: {self.input_solution}')
-        print(f'Algorithm Returned in {self.steps} steps with a {delta} delta')
+        print(f'Algorithm Returned in {self.steps} steps with a {delta} delta and {self.cache_hits} cache hits')
         print(f'Final Assignment:')
         print(' ')
         self.print_assignment(new_assignments, None)
 
-        return new_assignments, self.size, self.steps
+        return new_assignments, self.size, self.steps, self.cache_hits
 
     def recursive_reassign(self, assignments, open_assignment):
-        hash_key = str(hash(str(assignments))) + str(open_assignment)
+        hash_key = str(hash(str(sort(assignments)))) + str(open_assignment)
 
         if hash_key in self._cache:
+            self.cache_hits += 1
             return self._cache[hash_key]
-        # self.print_assignment(assignments, open_assignment)
-
-        greates_value_increase = 0
-        swap = None
 
         max_delta = 0
         max_assignments = None
-        #
-        # 4,4 -> 4,6 + 6,6 -> 6,4
-        #
-        # 0,2 -> 0,4 + 6,4 -> 6,2
-        #
-        # 1,1 -> 1,2 + 6,2 -> 6,1
-        if open_assignment == (6, 4):
-            pass
-
-        if open_assignment == (6, 2):
-            pass
-
-        if open_assignment == (6, 1):
-            pass
-
-        if open_assignment == (6, 4):
-            pass
 
         for cur_assignment in assignments:
             self.steps += 1
@@ -88,9 +69,9 @@ class IncrementalAssignmentAlgorithm(object):
             # Previous Assignment
             open_a_delta -= self.values[prev_open_a[0]][prev_open_a[1]]
 
-            # if cur_a_delta <= open_a_delta:
-            # if cur_a_delta < 0 or open_a_delta < 0:
-                # greates_value_increase = cur_a_delta + open_a_delta
+            if open_a_delta > cur_a_delta:
+                pass
+
             a = assignments.copy()
             a.remove(prev_cur_a)
 
@@ -99,41 +80,12 @@ class IncrementalAssignmentAlgorithm(object):
                 max_delta = cur_a_delta + open_a_delta + delta
                 max_assignments = optimal_assignment + [new_cur_a]
 
-            # # if cur_a_delta >= open_a_delta:
-            # a = assignments.copy()
-            # a.remove(prev_cur_a)
-            #
-            # optimal_assignment, delta = self.recursive_reassign(a, new_cur_a)
-            # if max_delta > cur_a_delta + open_a_delta + delta:
-            #     max_delta = cur_a_delta + open_a_delta + delta
-            #     max_assignments = optimal_assignment + [new_open_a]
-
         if max_assignments:
-            ss = True
-            for a in max_assignments:
-                if a not in [(0, 4), (1, 2), (2, 5), (3, 3), (4, 6), (5, 0), (6, 1)]:
-                    ss = False
-
-            if ss:
-                print('TRUUEE')
-            else:
-                print('FAALSE')
-
-            self.print_assignment(max_assignments, [])
             self._cache[hash_key] = max_assignments, max_delta
             return max_assignments, max_delta
         else:
             self._cache[hash_key] = assignments + [open_assignment], 0
             return assignments + [open_assignment], 0
-        # if swap is not None:
-        #     # We shouldn't have to recalculate the value delta for reversing the swap that we just did.
-        #     # So, would it be fair to just remove the new assignment as long as the cur and open delta are not equal?
-        #     assignments.append(swap[0])
-        #     assignments.remove(swap[1])
-        #
-        #     return self.recursive_reassign(assignments, swap[2])
-        # else:
-        #     return assignments + [open_assignment]
 
     def print_assignment(self, assignments, open_a):
 
