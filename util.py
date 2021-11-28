@@ -54,7 +54,7 @@ def generate_random_test(min_size=4, max_size=4, val_range=9, num_tests=1):
 
         # Adding the incremental
         [row.append(random.randint(0, val_range)) for row in matrix]
-        matrix.append([random.randint(0, val_range) for _ in range(0, size)])
+        matrix.append([random.randint(0, val_range) for _ in range(0, size + 1)])
 
         examples.append({'values': matrix, 'solution': solution})
 
