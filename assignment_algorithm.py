@@ -7,7 +7,6 @@ import argparse
 
 
 if __name__ == '__main__':
-    generate_random_test()
 
     parser = argparse.ArgumentParser(description='Run the Incremental Assignment Algorithm.')
 

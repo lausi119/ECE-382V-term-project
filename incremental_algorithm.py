@@ -70,9 +70,6 @@ class IncrementalAssignmentAlgorithm(object):
             # Previous Assignment
             open_a_delta -= self.values[prev_open_a[0]][prev_open_a[1]]
 
-            if open_a_delta > cur_a_delta:
-                pass
-
             a = assignments.copy()
             a.remove(prev_cur_a)
 
