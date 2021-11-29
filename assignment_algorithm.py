@@ -12,10 +12,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--test', type=str, help='Test Type - either `file` or `random`')
     parser.add_argument('--settings', type=str)
+    parser.add_argument('--exhaustive', type=str, help='Either `t` or `true` for true, everything else is false. '
+                                                       'Not case sensitive')
+
     args = parser.parse_args()
 
     if args.test == 'file':
-        examples = [load_tests_from_file()[0]]
+        # examples = [load_tests_from_file()[3]]
+        examples = load_tests_from_file()
 
     elif args.test == 'random':
         if args.settings is not None:
@@ -49,7 +53,8 @@ if __name__ == '__main__':
             example['values'],
             # Couldn't load tuples from the JSON file but I am too lazy to use arrays instead,
             # so im just casting all the solution arrays from the json to tuples here
-            [(a[0], a[1]) for a in example['solution']]
+            [(a[0], a[1]) for a in example['solution']],
+            True if str(args.exhaustive).lower() in ('true', 't') else False
         ).run()
 
         valid, incremental_total, munkres_total = validate_result(example['values'], output_assignments)
