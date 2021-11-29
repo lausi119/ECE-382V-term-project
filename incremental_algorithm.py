@@ -27,6 +27,7 @@ class IncrementalAssignmentAlgorithm(object):
 
         open_assignment = (row_idxs[0], col_idxs[0])
 
+        self.print_assignment(self.input_solution, open_assignment)
         new_assignments, delta = self.recursive_reassign(self.input_solution, open_assignment)
 
         print(' ')
