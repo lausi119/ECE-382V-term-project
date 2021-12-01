@@ -3,13 +3,14 @@ from util import pad_matrix, sort
 
 class IncrementalAssignmentAlgorithm(object):
 
-    def __init__(self, values, solution, exhaustive=False):
+    def __init__(self, values, solution, option='exhaustive', cache=True):
         self.size = pad_matrix(values)
         self.values = values
         self.input_solution = solution
         self.steps = 0
         self.cache_hits = 0
-        self.exhaustive = exhaustive
+        self.option = option
+        self.cache_it = cache
 
         self._cache = {}
 
@@ -42,10 +43,11 @@ class IncrementalAssignmentAlgorithm(object):
 
     def recursive_reassign(self, assignments, open_assignment):
 
-        hash_key = str(hash(str(sort(assignments)))) + str(open_assignment)
-        if hash_key in self._cache:
-            self.cache_hits += 1
-            return self._cache[hash_key]
+        hash_key = str(hash(str(sort(assignments + [open_assignment]))))
+        if self.cache_it:
+            if hash_key in self._cache:
+                self.cache_hits += 1
+                return self._cache[hash_key]
 
         max_delta = 0
         max_assignments = None
@@ -69,32 +71,44 @@ class IncrementalAssignmentAlgorithm(object):
                     - self.values[open_assignment[0]][open_assignment[1]]
             )
 
-            if self.exhaustive:
-                a = assignments.copy()
-                a.remove(cur_assignment)
-                optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
-                delta += cur_assignment_delta + open_assignment_delta
-                if max_delta > delta:
-                    max_delta = delta
-                    max_assignments = optimal_assignment + [updated_open_assignment]
+            a = assignments.copy()
+            a.remove(cur_assignment)
 
-            elif open_assignment_delta < 0:
-                a = assignments.copy()
-                a.remove(cur_assignment)
-                optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
-                delta += cur_assignment_delta + open_assignment_delta
-                if max_delta > delta:
-                    max_delta = delta
-                    max_assignments = optimal_assignment + [updated_open_assignment]
+            delta = 9999999999999999999999999999
+            optimal_assignment = None
 
-            elif cur_assignment_delta < 0:
-                a = assignments.copy()
-                a.remove(cur_assignment)
-                optimal_assignment, delta = self.recursive_reassign(a, updated_open_assignment)
-                delta += cur_assignment_delta + open_assignment_delta
-                if max_delta > delta:
-                    max_delta = delta
-                    max_assignments = optimal_assignment + [updated_cur_assignment]
+            if self.option == 'exhaustive':
+                optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
+                optimal_assignment += [updated_open_assignment]
+
+            elif self.option == 'smaller_delta':
+                if open_assignment_delta < 0:
+                    optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
+                    optimal_assignment += [updated_open_assignment]
+
+                elif cur_assignment_delta < 0:
+                    optimal_assignment, delta = self.recursive_reassign(a, updated_open_assignment)
+                    optimal_assignment += [updated_cur_assignment]
+
+            elif self.option == 'open_delta':
+                if open_assignment_delta < 0:
+                    optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
+                    optimal_assignment += [updated_open_assignment]
+
+            elif self.option == 'open_or_cur_delta':
+                if open_assignment_delta < 0 or cur_assignment_delta < 0:
+                    optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
+                    optimal_assignment += [updated_open_assignment]
+
+            elif self.option == 'smaller_open_or_both_delta':
+                if open_assignment_delta < 0 or open_assignment_delta + cur_assignment_delta < 0:
+                    optimal_assignment, delta = self.recursive_reassign(a, updated_cur_assignment)
+                    optimal_assignment += [updated_open_assignment]
+
+            delta += cur_assignment_delta + open_assignment_delta
+            if max_delta > delta:
+                max_delta = delta
+                max_assignments = optimal_assignment
 
         if max_assignments:
             self._cache[hash_key] = max_assignments, max_delta

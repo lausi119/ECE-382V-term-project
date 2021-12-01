@@ -34,33 +34,57 @@ if __name__ == '__main__':
     else:
         raise Exception(f"test `{args.test}` is not valid")
 
-    history = []
+    # for i in ['smaller_delta', 'open_delta', 'open_or_cur_delta', 'smaller_open_or_both_delta']:
+    for i in ['exhaustive']:
+        history = []
+        history_by_size = {}
+        for idx in range(0, len(examples)):
 
-    for idx in range(0, len(examples)):
+            print("")
+            print("")
+            print("")
+            print("")
+            print("################################################################")
+            print("################################################################")
+            print(f"{i} - EXAMPLE {idx}")
+            print("################################################################")
+            print("")
 
-        print("")
-        print("")
-        print("")
-        print("")
-        print("################################################################")
-        print("################################################################")
-        print(f"EXAMPLE {idx}")
-        print("################################################################")
-        print("")
+            example = examples[idx]
+            output_assignments, size, steps, cache_hits = IncrementalAssignmentAlgorithm(
+                example['values'],
+                # Couldn't load tuples from the JSON file but I am too lazy to use arrays instead,
+                # so im just casting all the solution arrays from the json to tuples here
+                [(a[0], a[1]) for a in example['solution']],
+                i  # True if str(args.exhaustive).lower() in ('true', 't') else False
+            ).run()
 
-        example = examples[idx]
-        output_assignments, size, steps, cache_hits = IncrementalAssignmentAlgorithm(
-            example['values'],
-            # Couldn't load tuples from the JSON file but I am too lazy to use arrays instead,
-            # so im just casting all the solution arrays from the json to tuples here
-            [(a[0], a[1]) for a in example['solution']],
-            True if str(args.exhaustive).lower() in ('true', 't') else False
-        ).run()
+            valid, incremental_total, munkres_total = validate_result(example['values'], output_assignments)
 
-        valid, incremental_total, munkres_total = validate_result(example['values'], output_assignments)
+            if size not in history_by_size:
+                history_by_size[size] = []
 
-        history.append((str(size), str(steps), str(cache_hits), str(valid), str(incremental_total), str(munkres_total)))
+            history_by_size[size].append(
+                (str(size), int(steps), str(cache_hits), int(valid), str(incremental_total), str(munkres_total))
+            )
+            history.append(
+                (str(size), str(steps), str(cache_hits), str(valid), str(incremental_total), str(munkres_total))
+            )
 
-    write_to_csv(history)
+        write_to_csv(history, i)
 
+        avg_histories = []
+        valid_count = 0
+        total_count = 0
+        for size in history_by_size:
+            avg_histories.append((
+                str(size),
+                str(sum([val[1] for val in history_by_size[size]])/len(history_by_size[size])),
+                str(len([True for val in history_by_size[size] if val[3]]) / len(history_by_size[size]))
+            ))
+            valid_count += len([True for val in history_by_size[size] if val[3]])
+            total_count += len(history_by_size[size])
+
+        avg_histories.append((str(valid_count), str(total_count), str(valid_count/total_count)))
+        write_to_csv(avg_histories, f'{i}_avg')
 

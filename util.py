@@ -21,8 +21,8 @@ def pad_matrix(matrix):
     return size
 
 
-def write_to_csv(data):
-    with open('output.csv', 'w') as f:
+def write_to_csv(data, idx):
+    with open(f'output_{idx}.csv', 'w+') as f:
         for row in data:
             f.write(','.join(row) + '\n')
 
@@ -41,23 +41,23 @@ def load_tests_from_file():
         return json.load(f)
 
 
-def generate_random_test(min_size=4, max_size=4, val_range=9, num_tests=1):
+def generate_random_test(min_size=4, max_size=10, val_range=9, num_tests=1):
     import random
     from munkres import Munkres
 
     examples = []
     m = Munkres()
-    for idx in range(0, num_tests):
-        size = random.randint(min_size, max_size)
+    for idx in range(min_size, max_size):
+        size = idx  # random.randint(min_size, max_size)
+        for _ in range(0, num_tests):
+            matrix = [[random.randint(0, val_range) for _ in range(0, size)] for _ in range(0, size)]
+            solution = m.compute(matrix)
 
-        matrix = [[random.randint(0, val_range) for _ in range(0, size)] for _ in range(0, size)]
-        solution = m.compute(matrix)
+            # Adding the incremental
+            [row.append(random.randint(0, val_range)) for row in matrix]
+            matrix.append([random.randint(0, val_range) for _ in range(0, size + 1)])
 
-        # Adding the incremental
-        [row.append(random.randint(0, val_range)) for row in matrix]
-        matrix.append([random.randint(0, val_range) for _ in range(0, size + 1)])
-
-        examples.append({'values': matrix, 'solution': solution})
+            examples.append({'values': matrix, 'solution': solution})
 
     return examples
 
