@@ -29,7 +29,7 @@ class IncrementalAssignmentAlgorithm(object):
 
         open_assignment = (row_idxs[0], col_idxs[0])
 
-        self.print_assignment(self.input_solution, open_assignment)
+        # self.print_assignment(self.input_solution, open_assignment)
         new_assignments, delta = self.recursive_reassign(self.input_solution, open_assignment)
 
         print(' ')
@@ -37,7 +37,7 @@ class IncrementalAssignmentAlgorithm(object):
         print(f'Algorithm Returned in {self.steps} steps with a {delta} delta and {self.cache_hits} cache hits')
         print(f'Final Assignment:')
         print(' ')
-        self.print_assignment(new_assignments, None)
+        # self.print_assignment(new_assignments, None)
 
         return new_assignments, self.size, self.steps, self.cache_hits
 

@@ -1,5 +1,5 @@
 import json
-import time
+import random
 
 
 def pad_matrix(matrix):
@@ -22,7 +22,7 @@ def pad_matrix(matrix):
 
 
 def write_to_csv(data, idx):
-    with open(f'output_{idx}.csv', 'w+') as f:
+    with open(f'output_{idx}.csv', 'a') as f:
         for row in data:
             f.write(','.join(row) + '\n')
 
@@ -42,24 +42,28 @@ def load_tests_from_file():
 
 
 def generate_random_test(min_size=4, max_size=10, val_range=9, num_tests=1):
-    import random
     from munkres import Munkres
 
     examples = []
     m = Munkres()
-    for idx in range(min_size, max_size):
+    for idx in range(min_size, max_size + 1):
         size = idx  # random.randint(min_size, max_size)
         for _ in range(0, num_tests):
-            matrix = [[random.randint(0, val_range) for _ in range(0, size)] for _ in range(0, size)]
-            solution = m.compute(matrix)
-
-            # Adding the incremental
-            [row.append(random.randint(0, val_range)) for row in matrix]
-            matrix.append([random.randint(0, val_range) for _ in range(0, size + 1)])
-
-            examples.append({'values': matrix, 'solution': solution})
+            examples.append(_generate_random_test(m, val_range, size))
 
     return examples
+
+
+def _generate_random_test(m, val_range, size):
+
+    matrix = [[random.randint(0, val_range) for _ in range(0, size)] for _ in range(0, size)]
+    solution = m.compute(matrix)
+
+    # Adding the incremental
+    [row.append(random.randint(0, val_range)) for row in matrix]
+    matrix.append([random.randint(0, val_range) for _ in range(0, size + 1)])
+
+    return {'values': matrix, 'solution': solution}
 
 
 def validate_result(values, assignments):
@@ -76,9 +80,22 @@ def validate_result(values, assignments):
     for a in assignments:
         incremental_total += values[a[0]][a[1]]
 
-    print('Validating:')
-    print(f'Munkres:     {munkres_total}, {sort(solution)}')
-    print(f'Incremental: {incremental_total}, {sort(assignments)}')
+    # print('Validating:')
+    # print(f'Munkres:     {munkres_total}, {sort(solution)}')
+    # print(f'Incremental: {incremental_total}, {sort(assignments)}')
     # print(values)
 
     return incremental_total == munkres_total, incremental_total, munkres_total
+
+
+def run_example(example, i):
+
+    output_assignments, size, steps, cache_hits = IncrementalAssignmentAlgorithm(
+        example['values'],
+        # Couldn't load tuples from the JSON file but I am too lazy to use arrays instead,
+        # so im just casting all the solution arrays from the json to tuples here
+        [(a[0], a[1]) for a in example['solution']],
+        i  # True if str(args.exhaustive).lower() in ('true', 't') else False
+    ).run()
+
+    return validate_result(example['values'], output_assignments)
